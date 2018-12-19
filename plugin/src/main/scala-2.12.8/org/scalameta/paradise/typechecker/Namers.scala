@@ -287,8 +287,14 @@ trait Namers { self: AnalyzerPlugins =>
           if (isEnumConstant(tree))
             tree.symbol setInfo ConstantType(Constant(tree.symbol))
         case tree @ DefDef(_, nme.CONSTRUCTOR, _, _, _, _) =>
+          if (mexists(tree.vparamss)(_.mods.hasDefault))
+            enterDefaultGetters(tree.symbol, tree, tree.vparamss, tree.tparams)
+          
           sym setInfo completerOf(tree)
         case tree @ DefDef(mods, name, tparams, _, _, _) =>
+          if (mexists(tree.vparamss)(_.mods.hasDefault))
+            enterDefaultGetters(tree.symbol, tree, tree.vparamss, tree.tparams)
+
           val bridgeFlag = if (mods hasAnnotationNamed tpnme.bridgeAnnot) BRIDGE | ARTIFACT else 0
           sym setFlag bridgeFlag
           val completer =
